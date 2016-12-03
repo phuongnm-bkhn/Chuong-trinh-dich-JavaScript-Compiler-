@@ -1,0 +1,18 @@
+
+reverse_string@1@(do|while|if|then|else|continue|var|true|false)
+string@1@((\"[^\n"]+\")|(\'[^\n']+\'))
+
+ws@1@[ \t]+
+new_line@1@([\r\n])+
+
+alpha@0@[A-Za-z]
+dig@0@[0-9]
+var_name@1@({alpha})({alpha}|{dig}|_)*
+
+num1@0@{dig}+\.?([eE][-+]?{dig}+)?
+num2@0@{dig}*\.{dig}+([eE][-+]?{dig}+)?
+const_number@1@{num1}|{num2}
+
+condition@1@(==|>=|<=)
+
+char@1@[(){}\[\];\+\-\/*=!?:><]

@@ -1,0 +1,4 @@
+﻿//////////////////
+flex -o bai3.lex.c -l bai3.l
+bison -o bai3.tab.c -vd bai3.y
+gcc -o bai3 bai3.lex.c bai3.tab.c -lm -ll
