@@ -23,27 +23,6 @@
             "preLaunchTask": "g++" 
         },
         {
-            "name": "C++ Terminal",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceRoot}/a.out",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceRoot}",
-            "environment": [],
-            "externalConsole": true,
-            "linux": {
-                "MIMode": "gdb"
-            },
-            "osx": {
-                "MIMode": "lldb"
-            },
-            "windows": {
-                "MIMode": "gdb"
-            },
-            "preLaunchTask": "run"
-        },
-        {
             "name": "C++ Attach",
             "type": "cppdbg",
             "request": "attach",

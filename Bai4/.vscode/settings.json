@@ -2,15 +2,21 @@
 {
     "files.exclude": {
         "**/.git": true,
+        "**/*.gch": true,
         "**/.svn": true,
         "**/.hg": true,
         "**/.DS_Store": true,
-        "*.out":true,
-        ".fuse_*":true,
-        ".dep*":true,
-        "dist":true,
-        "build":true,
-        "*.cpp":false
-        
-    }
+        "**/a.out":true,
+        "**/.fuse_*":true,
+        "**/.dep*":true,
+        "**/dist":true,
+        "**/build":true,
+        "**/Makefile":true
+    },
+    "C_Cpp.autocomplete": "Default",
+    "C_Cpp.clang_format_sortIncludes": true,
+    "C_Cpp.clang_format_formatOnSave": true,
+    "C_Cpp.clang_format_style": "file",
+    "editor.formatOnType":true,
+    "editor.tabCompletion": true
 }

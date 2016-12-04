@@ -1,4 +1,0 @@
-mo tngay tngay
-
-sdt=1;
-ahihi
