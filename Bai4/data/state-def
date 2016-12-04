@@ -1,2 +1,0 @@
-%tokens:id
-id->id+id|id-id|id*id|id/id|const_number|string

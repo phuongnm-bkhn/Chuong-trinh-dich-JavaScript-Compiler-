@@ -1,0 +1,4 @@
+%tokens:id,const_number,string
+id->id+id|id-id|id*id|id/id|const_number|string
+// con dien
+%tokens:do,while,if,then,else,false,true
