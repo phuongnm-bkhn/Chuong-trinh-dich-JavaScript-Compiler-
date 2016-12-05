@@ -11,12 +11,23 @@ using namespace std;
 
 extern vector<string> splitString(string sInput, string sDelimiter);
 
+class Tokener;
+
 class Tokener
 {
   public:
-    Tokener(string sTokenDefine);
+    Tokener(string sTokenName, vector<vector<Tokener *>> m_lstTokenInfer);
+    Tokener(string sTokenName);
+    ~Tokener();
+
+    bool isTerminal();
+
   private:
-    string m_sTokenDefine;
+    string m_sTokenName;
+    bool m_bIsTerminalToken;
+    vector<vector<Tokener *>> m_lstTokenInfer;
+
+    static map<string, Tokener*> m_mapToken;
 };
 
 #endif
