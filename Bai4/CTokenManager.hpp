@@ -30,7 +30,7 @@ class TokenManager
     // Khu de qui trai
     bool removeLeftRecursion();
 
-    bool isToken();
+    bool isToken(string sName);
 
     bool m_bIsParsed;
     string m_sTokenNameEpsilon;

@@ -10,10 +10,10 @@ TokenManager::TokenManager(string sPathFileGrammar)
 
     // classify symbol terminal and not terminal
     // and save to m_lstTokenTerminalName, m_lstTokenNotTerminalName
-    this->classifyToken();
+    this-> classifyToken(); 
 
     // remove left recursion and save token
-    this->removeLeftRecursion();
+    // this->removeLeftRecursion();
 
     vector<string> lstRet = this->m_lstTokenTerminalName;
     for (int i = 0; i < lstRet.size(); i++)
@@ -72,7 +72,7 @@ bool TokenManager::removeLeftRecursion()
             break;
         sNameTokenLeft = lstTmp.at(0);
         lstInferRight = splitString(lstTmp.at(1), "|");
-        for 
+        // for 
     }
     return bRet;
 }

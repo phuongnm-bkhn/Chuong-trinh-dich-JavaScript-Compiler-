@@ -9,9 +9,10 @@
 using namespace std;
 #include "libs.h"
 
+class Tokener;
+
 extern vector<string> splitString(string sInput, string sDelimiter);
 
-class Tokener;
 
 class Tokener
 {
@@ -27,7 +28,6 @@ class Tokener
     bool m_bIsTerminalToken;
     vector<vector<Tokener *>> m_lstTokenInfer;
 
-    static map<string, Tokener*> m_mapToken;
 };
 
 #endif

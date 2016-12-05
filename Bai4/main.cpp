@@ -9,6 +9,9 @@ using namespace std;
 #include "CTokenManager.hpp"
 #include "libs.h"
 
+
+map<string, Tokener*> m_mapToken;
+
 int main(int argc, char **argv)
 {
     vector<TOKEN_ID> lstToken = getListToken("data/code.js");
