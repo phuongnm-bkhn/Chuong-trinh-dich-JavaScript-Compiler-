@@ -16,8 +16,9 @@
 
 %tokens:do,while,if,then,else,false,true,+,*,%,(,),S,H,G,I,K,~
 //id->true|false
+//%tokens:E,E',T,T',F
 
-%tokens:E,E',T,T',F
+%tokens:E,T,F
 //E->T E'
 //E'->+ T E'|~
 //T->F T'
@@ -25,6 +26,6 @@
 //F->( E )|id
 S->E|H * G
 H->I|K
-E->E + T|S * T|T
+E->E + T|S * T|T|~
 T->T * F|F
 F->( E )|id

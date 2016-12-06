@@ -32,8 +32,10 @@ class TokenManager
     // Khu de qui trai
     bool initStateInfer();
 
+	void showStateInfer();
 
-
+	// sinh ten moi bang cach them ki tu '
+	string TokenManager::generateNewName(string sName);
     bool isToken(string sName);
 	bool isTokenTerminal(string sName);
 
@@ -44,6 +46,7 @@ class TokenManager
     vector<string> m_lstTokenNotTerminalName;
     vector<string> m_lstStateInferDefine;
 
+	unordered_map<string, vector<vector<string>>> m_mapInfer;
 };
 
 #endif
