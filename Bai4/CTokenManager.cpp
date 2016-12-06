@@ -3,9 +3,9 @@
 TokenManager::TokenManager(string sPathFileGrammar)
 {
     this->m_bIsParsed = false;
-    this->m_sTokenNameEpsilon = "$";
+    this->m_sTokenNameEpsilon = "~";
 
-    // read data and save to m_lstTokenName, m_lstStateInfer
+    // read data and save to m_lstTokenName, m_lstStateInferDefine
     this->loadFile(sPathFileGrammar);
 
     // classify symbol terminal and not terminal
@@ -13,7 +13,7 @@ TokenManager::TokenManager(string sPathFileGrammar)
     this-> classifyToken(); 
 
     // remove left recursion and save token
-    // this->removeLeftRecursion();
+     this->initStateInfer();
 
     vector<string> lstRet = this->m_lstTokenTerminalName;
     for (int i = 0; i < lstRet.size(); i++)
@@ -52,29 +52,131 @@ void TokenManager::loadFile(string sPathFile)
         }
         else
         {
-            this->m_lstStateInfer.push_back(line);
+            this->m_lstStateInferDefine.push_back(line);
         }
     }
 }
 
 // Khu de qui trai
-bool TokenManager::removeLeftRecursion()
+bool TokenManager::initStateInfer()
 {
-    bool bRet = false;
-    string sStateInfer, sNameTokenLeft;
-    vector<string> lstInferRight;
-    vector<vector<string>> lstNameTokenInferRight;
-    for (vector<string>::iterator it; it != this->m_lstStateInfer.end(); it++)
-    {
-        sStateInfer = *it;
-        vector<string> lstTmp = splitString(sStateInfer, "->");
-        if (lstTmp.size() != 2)
-            break;
-        sNameTokenLeft = lstTmp.at(0);
-        lstInferRight = splitString(lstTmp.at(1), "|");
-        // for 
-    }
-    return bRet;
+	bool bRet = false;
+	string sStateInfer, sNameTokenLeft;
+	vector<string> lstInferRight;
+	unordered_map<string, vector<vector<string>>> mapInfer;
+	unordered_map<string, vector<vector<string>>> mapInferRemovedLeftRecursion;
+
+
+	// Init state infer 
+	// --
+	// Cai dat cac luat sinh tu file dinh nghia
+	for (vector<string>::iterator it = m_lstStateInferDefine.begin();
+	it != this->m_lstStateInferDefine.end(); it++)
+	{
+		// lay trang thai suy dien vd string : A -> B , C | D
+		sStateInfer = *it;
+		vector<vector<string>> lstNameTokenInferRight;
+		vector<string> lstTmp = splitString(sStateInfer, "->");
+		if (lstTmp.size() != 2)
+			goto _EXIT_FUNCTION;
+
+		// ten token nguon  
+		sNameTokenLeft = lstTmp.at(0);
+		if (isToken(sNameTokenLeft) == false) {
+			cout << "Err: this is not token: " << sNameTokenLeft << endl;
+			goto _EXIT_FUNCTION;
+		}
+
+		lstInferRight = splitString(lstTmp.at(1), "|");	// ds trang thai dich 
+
+		// Duyet qua tung string trang thai dich ben phai 
+		for (string sToken : lstInferRight)
+		{
+			lstTmp = splitString(sToken, " ");
+		
+			// Kiem tra ten token ben phai luat sinh
+			for (string sTokenNameCheck : lstTmp) {
+				if (isToken(sTokenNameCheck) == false) {
+					cout << "Err: this is not token: " << sTokenNameCheck << endl;
+					goto _EXIT_FUNCTION;
+				}
+			}
+			lstNameTokenInferRight.push_back(lstTmp);
+		}
+		if (mapInfer.find(sNameTokenLeft) ==
+			mapInfer.end()) {
+			// Khoi tao ds sinh 
+			mapInfer[sNameTokenLeft] = lstNameTokenInferRight;
+		}
+		else {
+			// Cap nhat them vao mang ds sinh
+			vector<vector<string>> lstStateBefore =
+				mapInfer[sNameTokenLeft];
+
+			lstStateBefore.insert(lstStateBefore.end(),
+				lstNameTokenInferRight.begin(), lstNameTokenInferRight.end());
+
+			mapInfer[sNameTokenLeft] = lstStateBefore;
+		}
+	}
+
+	// Reformat state infer 
+	// -- 
+	// Cau truc lai ds luat sinh 
+	// - Xoa de qui gian tien 
+	// - Xoa de qui trai 
+	for (auto it = mapInfer.begin(); it != mapInfer.end(); ++it) 
+	{ 
+		// Xu ly tung luat suy dien -> luu vao mang mapInferRemovedLeftRecursion
+		string sTokenName = it->first;	// ve trai luat sinh
+		vector<vector<string>> lstInferRightDefine = it->second;	// ve phai luat sinh 
+		vector<vector<string>> lstInferRightChange;	// ve phai luat sinh 
+		bool bRecheck;
+		do {
+			bRecheck = false;
+			for (auto lstTokenNameRightDefine = lstInferRightDefine.begin();
+			lstTokenNameRightDefine != lstInferRightDefine.end(); ++lstTokenNameRightDefine)
+			{
+				// lay trang thai suy dien ben phai hien tai cua sTokenName
+				vector<string> lstTokenNameRightChange = *lstTokenNameRightDefine;	// ve phai luat sinh 
+
+				if (lstTokenNameRightChange.size() == 0) {
+					cout << "Err: List infer size = 0 of " << sTokenName << endl;
+					goto _EXIT_FUNCTION;
+				}
+
+				// lay ten token dau tien va thay the boi tap token da duoc dinh nghia truoc 
+				string sNameTokenFirstRight = lstTokenNameRightDefine->at(0);
+				auto it4 = mapInferRemovedLeftRecursion.find(sNameTokenFirstRight);
+
+				// Neu token id dau tien da duoc dinh nghia trong luat sinh truoc do 
+				// -> thay the token dau tien nay boi tap cac trang thai sinh ve phai 
+				if (it4 != mapInferRemovedLeftRecursion.end()) {
+					vector<vector<string>> lstTokenStateInferDefined = it4->second;
+					for (vector<string> lstTokenNameInferDefined : lstTokenStateInferDefined) {
+						lstTokenNameRightChange = lstTokenNameInferDefined;
+						lstTokenNameRightChange.insert(lstTokenNameRightChange.end(),
+							lstTokenNameRightDefine->begin() + 1, lstTokenNameRightDefine->end());
+						lstInferRightChange.push_back(lstTokenNameRightChange);
+					}
+					bRecheck = true;
+				}
+				else {
+					// TH bt - cac luat sinh tach biet nhau 
+					lstInferRightChange.push_back(*lstTokenNameRightDefine);
+				}
+			}
+			lstInferRightDefine = lstInferRightChange;
+			lstInferRightChange.clear();
+
+		} while (bRecheck);
+		mapInferRemovedLeftRecursion[sTokenName] = lstInferRightDefine;
+	}
+
+
+
+_EXIT_FUNCTION:
+	return bRet;
 }
 
 // phan loai token ket thuc | chua ket thuc |
@@ -86,7 +188,7 @@ bool TokenManager::classifyToken()
                                         this->m_lstTokenName.begin(), this->m_lstTokenName.end());
 
     // Check each state infer of grammar
-    for (string sStateInfer : this->m_lstStateInfer)
+    for (string sStateInfer : this->m_lstStateInferDefine)
     {
         vector<string> lstTmp = splitString(sStateInfer, "->");
         bool bCheck = false;
@@ -140,7 +242,7 @@ bool TokenManager::isParsed()
     return this->m_bIsParsed;
 }
 
-// Validate du lieu
+// Kiem tra token 
 bool TokenManager::isToken(string sName)
 {
     bool bCheck = false;
@@ -155,4 +257,21 @@ bool TokenManager::isToken(string sName)
         }
     }
     return bCheck;
+}
+
+// Kiem tra token terminal 
+bool TokenManager::isTokenTerminal(string sName)
+{
+	bool bCheck = false;
+	for (vector<string>::iterator it = this->m_lstTokenTerminalName.begin();
+	it != this->m_lstTokenTerminalName.end(); it++)
+	{
+		string sTokenName = *it;
+		if (sName == sTokenName)
+		{
+			bCheck = true;
+			break;
+		}
+	}
+	return bCheck;
 }

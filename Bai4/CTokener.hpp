@@ -28,6 +28,7 @@ class Tokener
     bool m_bIsTerminalToken;
     vector<vector<Tokener *>> m_lstTokenInfer;
 
+	static map<string, Tokener*> m_mapToken;
 };
 
 #endif

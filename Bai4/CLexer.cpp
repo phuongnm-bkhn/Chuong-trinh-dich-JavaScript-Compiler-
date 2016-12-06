@@ -1,3 +1,4 @@
+#ifdef VS_STUDIO
 #include "CLexer.h"
 
 #define YY_INT_ALIGNED short int
@@ -2050,6 +2051,22 @@ vector<TOKEN_ID> getListToken(string sPathFileCode){
 	}
 	return g_lstTokenDetected;
 }
- 
+#else  
 
-// #endif
+#include <fstream>
+#include <utility>
+#include <string>
+#include <iostream>
+#include <vector>
+#include "CLexer.h"
+using namespace std;
+
+// 
+map<TOKEN_ID, std::string> g_mapTokenName;
+
+vector<TOKEN_ID> getListToken(string sPathFileCode) {
+	vector<TOKEN_ID> g_lstTokenDetected;
+	return g_lstTokenDetected;
+}
+
+#endif

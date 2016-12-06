@@ -1,7 +1,7 @@
 
 #include "CTokener.hpp"
 
-
+map<string, Tokener*> Tokener::m_mapToken;
 
 Tokener::Tokener(string sTokenName, vector<vector<Tokener *>> lstTokenInfer)
 {
@@ -15,7 +15,7 @@ Tokener::Tokener(string sTokenName, vector<vector<Tokener *>> lstTokenInfer)
     else {
         this->m_bIsTerminalToken = false;
     }
-    m_mapToken[sTokenName] =  this;
+	Tokener::m_mapToken[sTokenName] =  this;
 }
 
 
@@ -23,13 +23,13 @@ Tokener::Tokener(string sTokenName)
 {
     this->m_sTokenName = sTokenName;
     this->m_bIsTerminalToken = true;
-    m_mapToken[sTokenName] = this;
+	Tokener::m_mapToken[sTokenName] = this;
 }
 
 Tokener::~Tokener()
 {
-    for (map<string, Tokener*>::iterator it = m_mapToken.begin();
-         it != m_mapToken.end(); it++)
+    for (map<string, Tokener*>::iterator it = Tokener::m_mapToken.begin();
+         it != Tokener::m_mapToken.end(); it++)
     {
         if (this->m_sTokenName == it->first){
             m_mapToken.erase(it);

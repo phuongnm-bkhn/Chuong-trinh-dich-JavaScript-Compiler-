@@ -4,8 +4,10 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <unordered_map>
 #include <streambuf>
 #include <vector>
+#include <string>
 using namespace std;
 #include "libs.h"
 
@@ -28,16 +30,20 @@ class TokenManager
     bool classifyToken();
 
     // Khu de qui trai
-    bool removeLeftRecursion();
+    bool initStateInfer();
+
+
 
     bool isToken(string sName);
+	bool isTokenTerminal(string sName);
 
     bool m_bIsParsed;
     string m_sTokenNameEpsilon;
     vector<string> m_lstTokenName;
     vector<string> m_lstTokenTerminalName;
     vector<string> m_lstTokenNotTerminalName;
-    vector<string> m_lstStateInfer;
+    vector<string> m_lstStateInferDefine;
+
 };
 
 #endif

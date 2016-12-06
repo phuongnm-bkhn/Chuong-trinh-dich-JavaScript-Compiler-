@@ -2,6 +2,7 @@
 #include <map>
 #include <stdio.h>
 #include <vector>
+#include <set>
 using namespace std;
 
 #include "CLexer.h"
@@ -9,13 +10,11 @@ using namespace std;
 #include "CTokenManager.hpp"
 #include "libs.h"
 
-
-map<string, Tokener*> m_mapToken;
-
 int main(int argc, char **argv)
 {
     vector<TOKEN_ID> lstToken = getListToken("data/code.js");
     TokenManager* tokenManager = new TokenManager("data/grammar-def");
+	
 
     for (int i = 0; i < lstToken.size(); i++)
     {

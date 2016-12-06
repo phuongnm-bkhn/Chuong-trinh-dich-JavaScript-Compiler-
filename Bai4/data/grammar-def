@@ -1,11 +1,30 @@
+////////////////////////////////////////////////////////////////////////////////////////
+//
+// dinh nghia token phai nam sau '%tokens:'
+//		cac token name cach nhau bang dau ',' - khong duoc chua ki tu nao khac 
+//
+// dinh nghia trang thai suy dien / luat sinh
+//		phan cac boi dau '->'
+//		ben trai la token name nguon
+//		ben phai la token name dich 
+//		tap token dich co the phan cach boi dau |		
+//		trong moi trang thai suy dien, cac token cach nhau 1 dau ' '
+//
+////////////////////////////////////////////////////////////////////////////////////////
 %tokens:id,const_number,string
-id->id+id|id-id|id*id|id/id|const_number|string
-// con dien
-%tokens:do,while,if,then,else,false,true
-id->true|false
+//id->id + id|id - id|id * id|id / id|const_number|string
 
-%tokens:A,A',B,B'
-A->A'
-A'->B|B'
-B->id
-B'->id
+%tokens:do,while,if,then,else,false,true,+,*,%,(,),S,H,G,I,K,~
+//id->true|false
+
+%tokens:E,E',T,T',F
+//E->T E'
+//E'->+ T E'|~
+//T->F T'
+//T'->* F T'|~
+//F->( E )|id
+S->E|H * G
+H->I|K
+E->E + T|S * T|T
+T->T * F|F
+F->( E )|id
