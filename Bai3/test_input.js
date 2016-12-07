@@ -6,5 +6,5 @@ do {
 var test = 4;
 
 while (i > 0) {
-t    x = x - y;
+    x = x - y;
 }

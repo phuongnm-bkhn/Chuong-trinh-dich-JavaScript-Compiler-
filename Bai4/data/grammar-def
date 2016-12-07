@@ -11,21 +11,26 @@
 //		trong moi trang thai suy dien, cac token cach nhau 1 dau ' '
 //
 ////////////////////////////////////////////////////////////////////////////////////////
-%tokens:id,const_number,string
+%tokens:~,$
+//%tokens:id,const_number,string
 //id->id + id|id - id|id * id|id / id|const_number|string
 
-%tokens:do,while,if,then,else,false,true,+,*,%,(,),S,H,G,I,K,~
+//%tokens:do,while,if,then,else,false,true,+,*,%,(,),S,H,G,I,K
 //id->true|false
-//%tokens:E,E',T,T',F
+%tokens:E,T,F,(,),*,+,id,id
 
-%tokens:E,T,F
 //E->T E'
 //E'->+ T E'|~
 //T->F T'
 //T'->* F T'|~
 //F->( E )|id
-S->E|H * G
-H->I|K
-E->E + T|S * T|T|~
+
+E->E + T|T
 T->T * F|F
 F->( E )|id
+
+//S->E|H * G
+//H->I|K
+//E->E + T|S * T|T|~
+//T->T * F|F
+//F->( E )|id
