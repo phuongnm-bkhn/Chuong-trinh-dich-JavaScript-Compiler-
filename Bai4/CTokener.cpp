@@ -3,7 +3,6 @@
 
 map<string, Tokener*> Tokener::mc_mapToken;
 vector<Tokener*> Tokener::mc_lstTokenGettingFirst;
-vector<Tokener*> Tokener::mc_lstTokenGettingFollow;
 
 Tokener::Tokener(string sTokenName, vector<vector<Tokener *>> lstTokenInfer)
 {
@@ -120,14 +119,62 @@ vector<Tokener *> Tokener::getFirstSet() {
 	return this->m_firstSet;
 }
 
-// Them token vao tap first
-void Tokener::addFirstSet(Tokener* pToken)
+vector<Tokener *> Tokener::getFollowSet() 
 {
-	auto it = find(this->m_firstSet.begin(), this->m_firstSet.end(), pToken);
-	if (it == this->m_firstSet.end()) {
-		// Neu ds first set chua co pToken thi add them vao  
-		this->m_firstSet.push_back(pToken);
+	// Doc tap follow tu thuoc tinh cua class 
+	return this->m_followSet;
+}
+// Tinh toan tap follow
+bool Tokener::initFollowSet() {
+	
+	bool bRet = false;
+	vector<Tokener *> followSetReturn;
+	Tokener* tokenEpsilon = TokenManager::getToken(TokenManager::m_sTokenNameEpsilon);
+	Tokener* tokenDola = TokenManager::getToken(TokenManager::m_sTokenNameDola);
+
+	if (this->isTerminal())
+		return bRet;
+
+	// Luat 1 
+	if (m_sTokenName == TokenManager::m_sTokenNameStart) {
+		bRet = this->addFollowSet(tokenDola);
 	}
+
+	// Luat 2 - 3 - 4 
+	for (auto stateInfer : this->m_lstStateInfer)
+	{
+		for (auto it = stateInfer.begin(); it != stateInfer.end(); it++) {
+			Tokener* pTokenB = *it;
+			if (pTokenB->isTerminal()) continue;
+			if (it + 1 != stateInfer.end())
+			{
+				// Luat sinh co dang: alpha - B - beta 
+				Tokener* pTokenBeta = *(it+1);
+				vector <Tokener*> tmpFirstBeta = pTokenBeta->getFirstSet();
+				auto itCheckEpsilon = find(tmpFirstBeta.begin(), tmpFirstBeta.end(), tokenEpsilon);
+				if (itCheckEpsilon != tmpFirstBeta.end()) 
+				{
+					// Luat 4:  neu first beta co chua epsilon
+					bool bRetTmp = pTokenB->addFollowSet(this->getFollowSet());
+					bRet = bRet || bRetTmp;
+
+					// xoa bo epsilon cho luat 2 
+					tmpFirstBeta.erase(itCheckEpsilon);
+				}
+				// Luat 2 :  
+				bool bRetTmp = pTokenB->addFollowSet(tmpFirstBeta);
+				bRet = bRet || bRetTmp;
+
+			}
+			else {
+				// Luat 3 - neu luat sinh co dang: alpha - B 
+				bool bRetTmp = pTokenB->addFollowSet(this->getFollowSet());
+				bRet = bRet || bRetTmp;
+			}
+		}
+	}
+	
+	return bRet;
 }
 
 // Them token vao tap first
@@ -136,4 +183,48 @@ void Tokener::addFirstSet(vector<Tokener*> listToken)
 	for (auto pToken : listToken) {
 		this->addFirstSet(pToken);
 	}
+}
+
+// Them token vao tap first
+void Tokener::addFirstSet(Tokener* pToken)
+{
+	// Neu ds first set chua co pTokenB thi add them vao  
+	if (isFirstSetContain(pToken) == false) {
+		this->m_firstSet.push_back(pToken);
+	}
+}
+
+// Kiem tra tap first co chua token hay khong
+bool Tokener::isFirstSetContain(Tokener* pToken) {
+	auto it = find(this->m_firstSet.begin(), this->m_firstSet.end(), pToken);
+	return !(it == this->m_firstSet.end());
+}
+
+// Them token vao tap follow
+bool Tokener::addFollowSet(vector<Tokener*> listToken)
+{
+	bool bRet = false;
+	for (auto pToken : listToken) {
+		bool tmpRet = this->addFollowSet(pToken);
+		if (tmpRet == true)
+			bRet = true;
+	}
+	return bRet;
+}
+
+// Them token vao tap follow
+bool Tokener::addFollowSet(Tokener* pToken)
+{
+	// Neu ds first set chua co pTokenB thi add them vao  
+	if (isFollowSetContain(pToken) == false) {
+		this->m_followSet.push_back(pToken);
+		return true;
+	}
+	return false;
+}
+
+// Kiem tra tap follow co chua token hay khong
+bool Tokener::isFollowSetContain(Tokener* pToken) {
+	auto it = find(this->m_followSet.begin(), this->m_followSet.end(), pToken);
+	return !(it == this->m_followSet.end());
 }

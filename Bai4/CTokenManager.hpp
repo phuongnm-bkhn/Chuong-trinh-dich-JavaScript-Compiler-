@@ -24,6 +24,8 @@ class TokenManager
 	~TokenManager();
 
 	static string m_sTokenNameEpsilon;
+	static string m_sTokenNameDola;
+	static string m_sTokenNameStart;
 
 
     // Kiem tra validate du lieu
@@ -45,12 +47,18 @@ class TokenManager
 	// Cai dat danh sach doi tuong token 
 	bool initTokenObject();
 
+	// Cai dat tap first va follow 
+	bool initFirstAndFollowSet();
+
 	void showStateInfer();
 
 	// sinh ten moi bang cach them ki tu '
 	string generateNewName(string sName);
 
     bool isToken(string sName);
+	bool addToken(string sName);
+	bool addToken(vector<string> lstName);
+
 	bool isTokenTerminal(string sName);
 	bool genListTokenInfer(vector<vector<string>> lstStateInferName,
 		vector<vector<Tokener*>> & lstStateInfer);
@@ -63,8 +71,7 @@ class TokenManager
     vector<string> m_lstTokenTerminalName;
     vector<string> m_lstTokenNotTerminalName;
     
-
-	unordered_map<string, vector<vector<string>>> m_mapInfer;
+	unordered_map<string, vector<vector<string>>> m_mapStringInfer;
 	static unordered_map<string, Tokener*> m_mapTokener;
 };
 
