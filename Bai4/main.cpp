@@ -12,6 +12,9 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
+	// Bat dau tu main truoc :: 
+	// codejs la file chua ma nguon 
+
     vector<TOKEN_ID> lstToken = getListToken("data/code.js");
     TokenManager* tokenManager = new TokenManager("data/grammar-def");
 	

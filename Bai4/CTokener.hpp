@@ -8,27 +8,44 @@
 #include <vector>
 using namespace std;
 #include "libs.h"
+#include "CTokenManager.hpp"
 
 class Tokener;
-
+class TokenManager;
 extern vector<string> splitString(string sInput, string sDelimiter);
 
 
 class Tokener
 {
-  public:
-    Tokener(string sTokenName, vector<vector<Tokener *>> m_lstTokenInfer);
-    Tokener(string sTokenName);
-    ~Tokener();
+public:
+	Tokener(string sTokenName, vector<vector<Tokener *>> lstStateInfer);
+	Tokener(string sTokenName, bool isTerminal = false);
 
-    bool isTerminal();
+	~Tokener();
 
-  private:
-    string m_sTokenName;
-    bool m_bIsTerminalToken;
-    vector<vector<Tokener *>> m_lstTokenInfer;
+	bool isTerminal();
+	void setListTokenInfer(vector<vector<Tokener *>> lstStateInfer);
+	
+	// Tinh toan tap first
+	vector<Tokener *> getFirstSet();
 
-	static map<string, Tokener*> m_mapToken;
+	// Lay ten 
+	string getName() { return m_sTokenName; }
+
+private:
+	// Them token vao tap first
+	void addFirstSet(Tokener* pToken);
+	void addFirstSet(vector<Tokener*> pToken);
+
+	string m_sTokenName;
+	bool m_bIsTerminalToken;
+	vector<vector<Tokener *>> m_lstStateInfer;
+	vector<Tokener *> m_firstSet;
+
+	static map<string, Tokener*> mc_mapToken;
+	static vector<Tokener*> mc_lstTokenGettingFirst;
+	static vector<Tokener*> mc_lstTokenGettingFollow;
+
 };
 
 #endif

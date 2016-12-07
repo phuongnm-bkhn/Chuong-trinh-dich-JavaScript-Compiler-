@@ -1,9 +1,11 @@
 #include "CTokenManager.hpp"
 
+string TokenManager::m_sTokenNameEpsilon = "~";;
+unordered_map<string, Tokener*> TokenManager::m_mapTokener;
+
 TokenManager::TokenManager(string sPathFileGrammar)
 {
     this->m_bIsParsed = false;
-    this->m_sTokenNameEpsilon = "~";
 
     // read data and save to m_lstTokenName, m_lstStateInferDefine
     this->loadFile(sPathFileGrammar);
@@ -14,7 +16,17 @@ TokenManager::TokenManager(string sPathFileGrammar)
 
     // remove left recursion and save token
      this->initStateInfer();
+	 
+	 // save state infer to object c++
+	 this->initTokenObject();
 
+	 Tokener* pTokenCheck = TokenManager::getToken("E");
+	 vector<Tokener*> setFirst = pTokenCheck->getFirstSet();
+	 cout << "first('"+pTokenCheck->getName()+"'): ";
+	 for (auto pToken : setFirst) {
+		 cout << pToken->getName() << " ";
+	 }
+	 cout << endl;
 	 this->showStateInfer();
 
     /*vector<string> lstRet = this->m_lstTokenTerminalName;
@@ -29,6 +41,14 @@ TokenManager::TokenManager(string sPathFileGrammar)
         cout << lstRet.at(i) << endl;
     }*/
 }
+
+TokenManager::~TokenManager() {
+	for (unordered_map<string, Tokener*>::iterator pTokener = TokenManager::m_mapTokener.begin(); 
+	pTokener != TokenManager::m_mapTokener.end() ; pTokener++) {
+		delete (pTokener->second);
+	}
+}
+
 
 // Doc du lieu file
 void TokenManager::loadFile(string sPathFile)
@@ -105,15 +125,13 @@ bool TokenManager::initStateInfer()
 			}
 			lstNameTokenInferRight.push_back(lstTmp);
 		}
-		if (mapInfer.find(sNameTokenLeft) ==
-			mapInfer.end()) {
+		if (mapInfer.find(sNameTokenLeft) == mapInfer.end()) {
 			// Khoi tao ds sinh 
 			mapInfer[sNameTokenLeft] = lstNameTokenInferRight;
 		}
 		else {
 			// Cap nhat them vao mang ds sinh
-			vector<vector<string>> lstStateBefore =
-				mapInfer[sNameTokenLeft];
+			vector<vector<string>> lstStateBefore =	mapInfer[sNameTokenLeft];
 
 			lstStateBefore.insert(lstStateBefore.end(),
 				lstNameTokenInferRight.begin(), lstNameTokenInferRight.end());
@@ -189,7 +207,7 @@ bool TokenManager::initStateInfer()
 		vector<vector<string>> lstInferRightForNewTokenName;	// ve phai luat sinh 
 		for (auto lstTokenNameRight : lstInferRightDefine) {
 			vector<string> lstTokenNameNew;
-			if (lstTokenNameRight.at(0) != sTokenName) 
+			if (lstTokenNameRight.at(0) != sTokenName && this->isTokenTerminal(sTokenName) == false) 
 			{
 				// sinh ds token moi cho token hien tai: sTokenName
 				if (lstTokenNameRight.at(0) == this->m_sTokenNameEpsilon) {
@@ -214,12 +232,14 @@ bool TokenManager::initStateInfer()
 		}
 
 		if (lstInferRightForNewTokenName.size() > 0) {
+			// Co de qui trai 
 			// them ds trang thai epsilon vao cuoi bo sinh cua token trung gian 
 			vector<string> tmpEpsilon;
 			tmpEpsilon.push_back(this->m_sTokenNameEpsilon);
 			lstInferRightForNewTokenName.push_back(tmpEpsilon);
 
-			// Co de qui trai 
+			this->m_lstTokenName.push_back(sTokenNameNew);
+			this->m_lstTokenNotTerminalName.push_back(sTokenNameNew);
 			mapInferRemovedIndirectRecursion[sTokenName] = lstInferRightForCurentTokenName;
 			mapInferRemovedIndirectRecursion[sTokenNameNew] = lstInferRightForNewTokenName;
 		}
@@ -231,20 +251,65 @@ bool TokenManager::initStateInfer()
 
 	// Luu vao thuoc tinh cua doi tuong 
 	this->m_mapInfer = mapInferRemovedIndirectRecursion;
+
+	bRet = true;
+_EXIT_FUNCTION:
+	return bRet;
+}
+
+// Cai dat danh sach doi tuong token 
+bool TokenManager::initTokenObject() 
+{
+	bool bRet = false;
+	for (auto sNameToken : this->m_lstTokenName) {
+		TokenManager::m_mapTokener[sNameToken] = 
+			new Tokener(sNameToken, isTokenTerminal(sNameToken));
+	}
+
+	// Luu doi tuong 
+	for (auto& tokenInfo : m_mapInfer) {
+		auto it = TokenManager::m_mapTokener.find(tokenInfo.first);
+		if (it != m_mapTokener.end())
+		{
+			Tokener* pTokener = it->second;
+			// Lay danh sach token ifer 
+			vector<vector<Tokener*>> lstTokenInfer;
+			if (genListTokenInfer(tokenInfo.second, lstTokenInfer) == false) {
+				goto _EXIT_FUNCTION;
+			}
+			pTokener->setListTokenInfer(lstTokenInfer);
+		}
+	}
 	bRet = true;
 
 _EXIT_FUNCTION:
 	return bRet;
 }
 
+// Hien thi ds trang thai suy dien cua he thong 
 void TokenManager::showStateInfer() {
-	
-	cout << "List state infer before: " << endl;
+
+	cout << "- List state infer before: " << endl;
 	for (auto state : m_lstStateInferDefine) {
 		cout << state << endl;
 	}
+	cout << endl;
 
-	cout << "List state infer after : " << endl;
+	cout << "- List token terminal: " << endl;
+	for (auto state : m_lstTokenTerminalName) {
+		cout << state << " ";
+	}
+	cout << endl;
+	cout << endl;
+
+	cout << "- List token non terminal: " << endl;
+	for (auto state : m_lstTokenNotTerminalName) {
+		cout << state << " ";
+	}
+	cout << endl;
+	cout << endl;
+
+	cout << "- List state infer after : " << endl;
 	int i = 0;
 	for (auto element : this->m_mapInfer) {
 		int j = 0;
@@ -265,7 +330,23 @@ void TokenManager::showStateInfer() {
 		if (++i != this->m_mapInfer.size())
 			cout << endl;
 	}
-/*
+	cout << endl;
+	cout << endl;
+
+	cout << "- List first set : " << endl;
+	for (auto sTokenName : this->m_lstTokenName) {
+		Tokener* pToken = TokenManager::getToken(sTokenName);
+		vector<Tokener*> first = pToken->getFirstSet();
+		cout << "First (" + sTokenName + ") = ";
+		for (auto pTokenInFirst : first) {
+			cout << pTokenInFirst->getName() << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+
+
+	/*
 	vector<string> lstRet = this->m_lstTokenTerminalName;
 	for (int i = 0; i < lstRet.size(); i++)
 	{
@@ -341,6 +422,15 @@ bool TokenManager::isParsed()
 {
     return this->m_bIsParsed;
 }
+Tokener* TokenManager::getToken(string sTokenName) {
+	
+	auto it = TokenManager::m_mapTokener.find(sTokenName);
+	if (it != TokenManager::m_mapTokener.end())
+		return it->second;
+	else 
+		return NULL;
+}
+
 
 // Kiem tra token 
 bool TokenManager::isToken(string sName)
@@ -382,4 +472,30 @@ string TokenManager::generateNewName(string sName) {
 		sNewName += "'";
 	}
 	return sNewName;
+}
+
+ bool TokenManager::genListTokenInfer(vector<vector<string>> lstStateInferName, 
+	 vector<vector<Tokener*>> & lstStateInfer)
+{
+	bool bRet = false;
+		
+	for (vector<string> lstToken : lstStateInferName)
+	{
+		vector<Tokener*> lstTokenPoint;
+		for (string sToken : lstToken) {
+			auto itToken = TokenManager::m_mapTokener.find(sToken);
+			if (itToken != m_mapTokener.end()) {
+				lstTokenPoint.push_back(itToken->second);
+			}
+			else {
+				cout << "Err: Not found token object: " << sToken << endl;
+				goto _EXIT_FUNCTION;
+			}
+
+		}
+		lstStateInfer.push_back(lstTokenPoint);
+	}
+	bRet = true;
+_EXIT_FUNCTION:
+	return bRet;
 }
