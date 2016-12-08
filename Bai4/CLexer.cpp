@@ -2064,8 +2064,26 @@ using namespace std;
 // 
 map<TOKEN_ID, std::string> g_mapTokenName;
 
-vector<TOKEN_ID> getListToken(string sPathFileCode) {
-	vector<TOKEN_ID> g_lstTokenDetected;
+vector<string> getListToken(string sPathFileCode) 
+{
+	/*vector<TOKEN_ID> g_lstTokenDetected;
+	g_lstTokenDetected.push_back(TOKEN_ID::ID_VAR);
+	g_lstTokenDetected.push_back(TOKEN_ID::TOKEN_OP_PLUS);
+	g_lstTokenDetected.push_back(TOKEN_ID::ID_VAR);
+	g_lstTokenDetected.push_back(TOKEN_ID::TOKEN_OP_MULTI);
+	g_lstTokenDetected.push_back(TOKEN_ID::ID_VAR);
+*/
+
+	vector<string> g_lstTokenDetected;
+	g_lstTokenDetected.push_back("id");
+	g_lstTokenDetected.push_back("+");
+	g_lstTokenDetected.push_back("id");
+	g_lstTokenDetected.push_back("*");
+	g_lstTokenDetected.push_back("(");
+	g_lstTokenDetected.push_back("id");
+	g_lstTokenDetected.push_back("+");
+	g_lstTokenDetected.push_back("id");
+	g_lstTokenDetected.push_back(")");
 	return g_lstTokenDetected;
 }
 

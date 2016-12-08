@@ -55,7 +55,7 @@ enum TOKEN_ID
     TOKEN_EOF
 };
 
-vector<TOKEN_ID> getListToken(string sPathFileCode);
+vector<string> getListToken(string sPathFileCode);
 extern std::map<TOKEN_ID, std::string> g_mapTokenName;
 
 #endif

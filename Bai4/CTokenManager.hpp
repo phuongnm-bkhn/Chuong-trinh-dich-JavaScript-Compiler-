@@ -30,6 +30,12 @@ class TokenManager
 
     // Kiem tra validate du lieu
     bool isParsed();
+	
+	// Hien thi thong tin parse 
+	void showStateInfer();
+
+	// Lay doi tuong token 
+	bool tryParse(vector<string> lstTokenInputCodeJs);
 
 	// Lay doi tuong token 
 	static Tokener* getToken(string sTokenName);
@@ -56,8 +62,14 @@ class TokenManager
 	// Them luat sinh vao bang grammar 
 	bool addStateInferToGrammarTable(Tokener* pTokenNotTerminal,
 		Tokener* pTokenTerminal, int stateInferId);
+	
+	// Kiem tra luat sinh tu bang grammar 
+	bool isContainInGrammarTable(Tokener* pTokenNotTerminal, Tokener* pTokenTerminal);
 
-	void showStateInfer();
+	// doc luat sinh tu bang grammar 
+	vector<Tokener*> getStateInferFromGrammarTable(Tokener* pTokenNotTerminal,
+		Tokener* pTokenTerminal);
+
 
 	// sinh ten moi bang cach them ki tu '
 	string generateNewName(string sName);

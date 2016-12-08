@@ -15,7 +15,7 @@
 //%tokens:id,const_number,string
 //id->id + id|id - id|id * id|id / id|const_number|string
 
-//%tokens:do,while,if,then,else,false,true,+,*,%,(,),S,H,G,I,K
+%tokens:do,while,if,then,else,false,true,+,*,%,(,),S,H,G,I,K
 //id->true|false
 %tokens:E,T,F,(,),*,+,id,id
 

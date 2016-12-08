@@ -546,6 +546,79 @@ Tokener* TokenManager::getToken(string sTokenName) {
 		return NULL;
 }
 
+// Hien thi ds trang thai suy dien cua he thong 
+bool TokenManager::tryParse(vector<string> lstTokenInputCodeJs) 
+{
+	bool bRet = false;
+	bool bContinueParse = true;
+	int ip = 0;
+	Tokener* pTokenDola = getToken(TokenManager::m_sTokenNameDola);
+	Tokener* pTokenEpsilon = getToken(TokenManager::m_sTokenNameEpsilon);
+
+	// stack processing 
+	vector<Tokener*> lstTokenStack;
+	lstTokenStack.push_back(pTokenDola);
+	lstTokenStack.push_back(getToken(TokenManager::m_sTokenNameStart));
+
+	// Add $ to list token input if input not contain $
+	if (lstTokenInputCodeJs.at(lstTokenInputCodeJs.size() - 1) != TokenManager::m_sTokenNameDola) 
+		lstTokenInputCodeJs.push_back(TokenManager::m_sTokenNameDola);
+	
+	// input processing 
+	vector<Tokener*> lstTokenInput;
+	for (auto sTokenName : lstTokenInputCodeJs) {
+		Tokener* pToken = getToken(sTokenName);
+		if (pToken == NULL) {
+			cout << "Err: preprocess: token name = '" << sTokenName << "' not found!" << endl;
+			goto _EXIT_FUNCTION;
+		}
+		lstTokenInput.push_back(pToken);
+	}
+
+	do {
+		// Loi logic
+		if (lstTokenInput.size() == 0 || lstTokenStack.size() == 0 || ip >= lstTokenInput.size())
+			break;
+
+		Tokener* pTokenHeadStack = *(lstTokenStack.end() - 1);
+		Tokener* pTokenInput = lstTokenInput.at(ip);
+		
+		// TH1 X = a  = $ 
+		if (pTokenHeadStack == pTokenInput && pTokenInput == pTokenDola) {
+			bRet = true;
+			bContinueParse = false;
+			goto _EXIT_FUNCTION;
+		}
+
+		// TH2 X = a  != $ 
+		if (pTokenHeadStack == pTokenInput && pTokenInput != pTokenDola) {
+			lstTokenStack.pop_back();
+			ip++;
+		}
+
+		// TH3 X is not terminal 
+		if (pTokenHeadStack->isTerminal() == false) {
+			if (isContainInGrammarTable(pTokenHeadStack, pTokenInput)) {
+				vector<Tokener*> lstTokenInfer = getStateInferFromGrammarTable(pTokenHeadStack, pTokenInput);
+				if (*(lstTokenInfer.end() - 1) == pTokenEpsilon) 
+					lstTokenInfer.pop_back();
+				
+				lstTokenStack.pop_back();	// pop (X)
+				reverse(lstTokenInfer.begin(), lstTokenInfer.end()); // dao nguoc state infer
+				lstTokenStack.insert(lstTokenStack.end(), lstTokenInfer.begin(), lstTokenInfer.end());
+			}
+			else
+			{
+				bContinueParse = false;
+				bRet = false;
+			}
+		}
+
+	} while (bContinueParse);
+
+_EXIT_FUNCTION:
+	return bRet;
+}
 
 // Kiem tra token 
 bool TokenManager::isToken(string sName)
@@ -615,7 +688,40 @@ bool TokenManager::addStateInferToGrammarTable(Tokener* pTokenNotTerminal,
 	return bRet;
 }
 
+// Kiem tra luat sinh tu bang grammar 
+bool TokenManager::isContainInGrammarTable(Tokener* pTokenNotTerminal, Tokener* pTokenTerminal)
+{
+	bool bRet = false;
+	
+	auto itCheckRow = this->m_mapGrammarTable.find(pTokenNotTerminal);
+	if (itCheckRow != m_mapGrammarTable.end()) {
+		auto itCheckCol = itCheckRow->second.find(pTokenTerminal);
+		if (itCheckCol != itCheckRow->second.end()) {
+			bRet = true;
+		}
+	}
+_EXIT_FUNCTION:
+	return bRet;
+}
 
+// doc luat sinh tu bang grammar 
+vector<Tokener*> TokenManager::getStateInferFromGrammarTable(Tokener* pTokenNotTerminal,Tokener* pTokenTerminal)
+{
+	vector<Tokener*> lstTokenInfer;
+	if (isContainInGrammarTable(pTokenNotTerminal, pTokenTerminal) == false)
+	{	
+		// L?i 
+		throw(new runtime_error("Err getStateInferFromGrammarTable(): table grammar not contain row = "
+			+pTokenNotTerminal->getName() + " and col = " + pTokenTerminal->getName()));
+	}
+	else {
+		auto itCheckRow = this->m_mapGrammarTable.find(pTokenNotTerminal);
+		auto itCheckCol = itCheckRow->second.find(pTokenTerminal);
+		int idStateInfer = itCheckCol->second;
+		lstTokenInfer = pTokenNotTerminal->getListTokenInfer().at(idStateInfer);
+	}
+	return lstTokenInfer;
+}
 // Kiem tra token terminal 
 bool TokenManager::isTokenTerminal(string sName)
 {

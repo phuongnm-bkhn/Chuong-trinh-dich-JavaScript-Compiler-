@@ -12,17 +12,22 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-	// Bat dau tu main truoc :: 
 	// codejs la file chua ma nguon 
-
-    vector<TOKEN_ID> lstToken = getListToken("data/code.js");
+    vector<string> lstToken = getListToken("data/code.js");
     TokenManager* tokenManager = new TokenManager("data/grammar-def");
 	
+  //  for (int i = 0; i < lstToken.size(); i++)
+  //  {
+  //      string sTokenName = lstToken[i];
+  //      //printf("\ntoken => %s", g_mapTokenName[id].c_str());
+		//printf("\ntoken => %s", sTokenName);
+  //  }
+	bool bRet = tokenManager->tryParse(lstToken);
+	if(bRet)
+		cout << "True: Van ban input phu hop luat sinh !!" << endl;
+	else
+		cout << "False: Van ban input khong phu hop luat sinh !!" << endl;
 
-    for (int i = 0; i < lstToken.size(); i++)
-    {
-        TOKEN_ID id = lstToken[i];
-        printf("\ntoken => %s", g_mapTokenName[id].c_str());
-    }
     getchar();
+	delete(tokenManager);
 }
