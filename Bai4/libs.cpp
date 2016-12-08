@@ -12,7 +12,9 @@ vector<string> splitString(string sInput, string sDelimiter)
     while (nPos != string::npos)
     {
         // ghi kq vao mang tra ve
-        vtRet.push_back(sInput.substr(0, nPos));
+		string sFound = sInput.substr(0, nPos);
+		if (sFound.size() > 0)
+			vtRet.push_back(sFound);
 
         // Tang vi tri bat dau
         nPos = nPos + sDelimiter.size();

@@ -53,14 +53,15 @@ TokenManager::~TokenManager() {
 
 
 // Doc du lieu file
-void TokenManager::loadFile(string sPathFile)
+bool TokenManager::loadFile(string sPathFile)
 {
     map<string, vector<string>> mapRet;
 
     // Du lieu cua file dinh nghia cu phap
     ifstream fileStateDef(sPathFile);
     string line;
-    vector<string> vtTmp;
+	bool bRet = true;
+	vector<string> vtTmp;
 
     // Read + parse file grammar
     while (getline(fileStateDef, line))
@@ -72,14 +73,26 @@ void TokenManager::loadFile(string sPathFile)
         {
             line = line.substr((string("%tokens:")).size());
             vtTmp = splitString(line, ",");
-
             this->addToken(vtTmp);
         }
+		else if (line.find("%tokens_start:") == 0)
+		{
+			line = line.substr((string("%tokens_start:")).size());
+			TokenManager::m_sTokenNameStart = line;
+			this->addToken(line);
+		}
         else
         {
             this->m_lstStateInferDefine.push_back(line);
         }
     }
+
+	if (TokenManager::m_sTokenNameStart.size() == 0 ||
+		this->m_lstStateInferDefine.size() == 0 ||
+		this->m_lstTokenName.size() == 0)
+		bRet = false;
+
+	return bRet;
 }
 
 // Khu de qui trai
@@ -147,7 +160,7 @@ bool TokenManager::initStateInfer()
 	// remove Indirect left recusive 
 	// -- 
 	// Cau truc lai ds luat sinh 
-	// - Xoa de qui gian tien 
+	// - Xoa de qui gian tiep
 	// - Xoa de qui trai 
 	for (auto it = mapInfer.begin(); it != mapInfer.end(); ++it) 
 	{ 
@@ -268,15 +281,6 @@ bool TokenManager::initTokenObject()
 	for (auto sNameToken : this->m_lstTokenName) {
 		TokenManager::m_mapTokener[sNameToken] = 
 			new Tokener(sNameToken, isTokenTerminal(sNameToken));
-	}
-
-	if (m_mapStringInfer.size() > 0) 
-	{
-		// Cai dat ten cho ki tu bat dau = ki tu dau ben ve phai luat sinh
-		for (auto& tokenInfo : m_mapStringInfer) {
-			TokenManager::m_sTokenNameStart = tokenInfo.first;
-			break;
-		}
 	}
 
 	// Them cac con tro lien ket giua cac doi tuong tuong tu nhu trong luat sinh 
@@ -450,17 +454,20 @@ void TokenManager::showStateInfer() {
 			}
 		}
 	}
-	printf(" [%5s] ", "");
+	printf("[%9s]", "");
 	for (auto col : mapShow) {
 		printf(" [%5s] ", col.first.c_str());
 	}
 	cout << endl;
 	for (int i = 0; i < mapShow.size() + 1; i++) {
+		if (i== 0 )
+			printf("[%9s]", "=========");
+		else
 		printf("=[%5s]=", "=====");
 	}
 	cout << endl;
 	for (auto row : m_mapGrammarTable) {
-		printf(" [%5s] ", row.first->getName().c_str());
+		printf("[%9s]", row.first->getName().c_str());
 		for (auto col : mapShow) {
 			if (row.second.find(getToken(col.first)) != row.second.end()) {
 				printf(" [%5d] ", row.second[getToken(col.first)]);
@@ -578,7 +585,10 @@ bool TokenManager::tryParse(vector<string> lstTokenInputCodeJs)
 	do {
 		// Loi logic
 		if (lstTokenInput.size() == 0 || lstTokenStack.size() == 0 || ip >= lstTokenInput.size())
+		{
+			cout << "Err: Logic err" << endl;
 			break;
+		}
 
 		Tokener* pTokenHeadStack = *(lstTokenStack.end() - 1);
 		Tokener* pTokenInput = lstTokenInput.at(ip);
@@ -609,6 +619,15 @@ bool TokenManager::tryParse(vector<string> lstTokenInputCodeJs)
 			}
 			else
 			{
+				cout << endl<<endl;
+				cout << "Input => ";
+				for (int i = 0; i <= ip; i++) {
+					cout <<" [" <<lstTokenInputCodeJs.at(i) << "] ";
+				}
+				cout << endl;
+				cout << "Err: Token input err [" <<pTokenInput->getName()<<"]"<<endl;
+				cout << "\t Token stack [" << pTokenHeadStack->getName() << "]" << endl;
+				
 				bContinueParse = false;
 				bRet = false;
 			}
@@ -674,9 +693,9 @@ bool TokenManager::addStateInferToGrammarTable(Tokener* pTokenNotTerminal,
 		auto itCheckTokenTerminal = stateInferOld.find(pTokenTerminal);
 		if (itCheckTokenTerminal != stateInferOld.end()) {
 			cout << "Warning: conflict in grammar table: row = " << pTokenNotTerminal->getName()
-				<< "col = " << pTokenTerminal->getName() << endl;
+				<< ", col = " << pTokenTerminal->getName() << endl;
 			cout << "\t old state id = " << itCheckTokenTerminal->second
-				<< "new state id = " << itCheckTokenTerminal->second << endl;
+				<< ", new state id = " << stateInferId << endl;
 			bRet = false;
 		}
 	}

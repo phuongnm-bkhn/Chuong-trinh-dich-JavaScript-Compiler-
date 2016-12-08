@@ -10,7 +10,6 @@ using namespace std;
 #include "libs.h"
 #include "CTokenManager.hpp"
 
-class Tokener;
 class TokenManager;
 extern vector<string> splitString(string sInput, string sDelimiter);
 

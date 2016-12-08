@@ -23,6 +23,7 @@ int main(int argc, char **argv)
 		//printf("\ntoken => %s", sTokenName);
   //  }
 	bool bRet = tokenManager->tryParse(lstToken);
+	cout << endl << endl;
 	if(bRet)
 		cout << "True: Van ban input phu hop luat sinh !!" << endl;
 	else

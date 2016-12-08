@@ -1,7 +1,15 @@
-State 41 conflicts: 4 shift/reduce
-State 42 conflicts: 4 shift/reduce
-State 43 conflicts: 4 shift/reduce
+Terminals unused in grammar
+
+   "-"
+   "+"
+   "*"
+   "/"
+
+
 State 44 conflicts: 4 shift/reduce
+State 45 conflicts: 4 shift/reduce
+State 46 conflicts: 4 shift/reduce
+State 47 conflicts: 4 shift/reduce
 
 
 Grammar
@@ -9,7 +17,7 @@ Grammar
     0 $accept: S $end
 
     1 S: S1
-    2  | S S1
+    2  | S1 S
 
     3 S1: S_W
     4   | S_DW
@@ -22,7 +30,7 @@ Grammar
     8 block: '{' statement_list '}'
 
     9 statement_list: %empty
-   10               | statement_list statement
+   10               | statement statement_list
 
    11 statement: declaration
    12          | assignment
@@ -39,12 +47,14 @@ Grammar
    20   | NUMBER
 
    21 condition: condition OR condition
-   22          | condition AND condition
-   23          | single_condition
+   22          | "(" condition OR condition ")"
+   23          | "(" condition AND condition ")"
+   24          | condition AND condition
+   25          | single_condition
 
-   24 single_condition: ex CONDITION ex
-   25                 | ID
-   26                 | NUMBER
+   26 single_condition: ex CONDITION ex
+   27                 | ID
+   28                 | NUMBER
 
 
 Terminals, with rules where they appear
@@ -61,44 +71,50 @@ $end (0) 0
 '{' (123) 8
 '}' (125) 8
 error (256)
-ID (258) 14 19 25
-NUMBER (259) 20 26
+ID (258) 14 19 27
+NUMBER (259) 20 28
 WHILE (260) 6 7
 DO (261) 6
-CONDITION (262) 24
-OR (263) 21
-AND (264) 22
+CONDITION (262) 26
+OR (263) 21 22
+AND (264) 23 24
 VAR (265) 13
+"-" (266)
+"+" (267)
+"*" (268)
+"/" (269)
+"(" (270) 22 23
+")" (271) 22 23
 
 
 Nonterminals, with rules where they appear
 
-$accept (21)
+$accept (27)
     on left: 0
-S (22)
+S (28)
     on left: 1 2, on right: 0 2
-S1 (23)
+S1 (29)
     on left: 3 4 5, on right: 1 2
-S_DW (24)
+S_DW (30)
     on left: 6, on right: 4
-S_W (25)
+S_W (31)
     on left: 7, on right: 3
-block (26)
+block (32)
     on left: 8, on right: 6 7
-statement_list (27)
+statement_list (33)
     on left: 9 10, on right: 8 10
-statement (28)
+statement (34)
     on left: 11 12, on right: 5 10
-declaration (29)
+declaration (35)
     on left: 13, on right: 11
-assignment (30)
+assignment (36)
     on left: 14, on right: 12 13
-ex (31)
-    on left: 15 16 17 18 19 20, on right: 14 15 16 17 18 24
-condition (32)
-    on left: 21 22 23, on right: 6 7 21 22
-single_condition (33)
-    on left: 24 25 26, on right: 23
+ex (37)
+    on left: 15 16 17 18 19 20, on right: 14 15 16 17 18 26
+condition (38)
+    on left: 21 22 23 24 25, on right: 6 7 21 22 23 24
+single_condition (39)
+    on left: 26 27 28, on right: 25
 
 
 State 0
@@ -154,27 +170,29 @@ State 4
 State 5
 
     0 $accept: S . $end
-    2 S: S . S1
 
-    $end   shift, and go to state 17
-    ID     shift, and go to state 1
-    WHILE  shift, and go to state 2
-    DO     shift, and go to state 3
-    VAR    shift, and go to state 4
-
-    S1           go to state 18
-    S_DW         go to state 7
-    S_W          go to state 8
-    statement    go to state 9
-    declaration  go to state 10
-    assignment   go to state 11
+    $end  shift, and go to state 17
 
 
 State 6
 
     1 S: S1 .
+    2  | S1 . S
+
+    ID     shift, and go to state 1
+    WHILE  shift, and go to state 2
+    DO     shift, and go to state 3
+    VAR    shift, and go to state 4
 
     $default  reduce using rule 1 (S)
+
+    S            go to state 18
+    S1           go to state 6
+    S_DW         go to state 7
+    S_W          go to state 8
+    statement    go to state 9
+    declaration  go to state 10
+    assignment   go to state 11
 
 
 State 7
@@ -228,26 +246,33 @@ State 13
 
     ID      shift, and go to state 22
     NUMBER  shift, and go to state 23
+    "("     shift, and go to state 24
 
-    ex                go to state 24
-    condition         go to state 25
-    single_condition  go to state 26
+    ex                go to state 25
+    condition         go to state 26
+    single_condition  go to state 27
 
 
 State 14
 
     8 block: '{' . statement_list '}'
 
+    ID   shift, and go to state 1
+    VAR  shift, and go to state 4
+
     $default  reduce using rule 9 (statement_list)
 
-    statement_list  go to state 27
+    statement_list  go to state 28
+    statement       go to state 29
+    declaration     go to state 10
+    assignment      go to state 11
 
 
 State 15
 
     6 S_DW: DO block . WHILE '(' condition ')' ';'
 
-    WHILE  shift, and go to state 28
+    WHILE  shift, and go to state 30
 
 
 State 16
@@ -266,7 +291,7 @@ State 17
 
 State 18
 
-    2 S: S S1 .
+    2 S: S1 S .
 
     $default  reduce using rule 2 (S)
 
@@ -293,129 +318,123 @@ State 21
    17   | ex . '*' ex
    18   | ex . '/' ex
 
-    ';'  shift, and go to state 29
-    '+'  shift, and go to state 30
-    '-'  shift, and go to state 31
-    '*'  shift, and go to state 32
-    '/'  shift, and go to state 33
+    ';'  shift, and go to state 31
+    '+'  shift, and go to state 32
+    '-'  shift, and go to state 33
+    '*'  shift, and go to state 34
+    '/'  shift, and go to state 35
 
 
 State 22
 
    19 ex: ID .
-   25 single_condition: ID .
+   27 single_condition: ID .
 
-    OR        reduce using rule 25 (single_condition)
-    AND       reduce using rule 25 (single_condition)
-    ')'       reduce using rule 25 (single_condition)
+    OR        reduce using rule 27 (single_condition)
+    AND       reduce using rule 27 (single_condition)
+    ')'       reduce using rule 27 (single_condition)
+    ")"       reduce using rule 27 (single_condition)
     $default  reduce using rule 19 (ex)
 
 
 State 23
 
    20 ex: NUMBER .
-   26 single_condition: NUMBER .
+   28 single_condition: NUMBER .
 
-    OR        reduce using rule 26 (single_condition)
-    AND       reduce using rule 26 (single_condition)
-    ')'       reduce using rule 26 (single_condition)
+    OR        reduce using rule 28 (single_condition)
+    AND       reduce using rule 28 (single_condition)
+    ')'       reduce using rule 28 (single_condition)
+    ")"       reduce using rule 28 (single_condition)
     $default  reduce using rule 20 (ex)
 
 
 State 24
 
-   15 ex: ex . '+' ex
-   16   | ex . '-' ex
-   17   | ex . '*' ex
-   18   | ex . '/' ex
-   24 single_condition: ex . CONDITION ex
+   22 condition: "(" . condition OR condition ")"
+   23          | "(" . condition AND condition ")"
 
-    CONDITION  shift, and go to state 34
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-    '*'        shift, and go to state 32
-    '/'        shift, and go to state 33
+    ID      shift, and go to state 22
+    NUMBER  shift, and go to state 23
+    "("     shift, and go to state 24
+
+    ex                go to state 25
+    condition         go to state 36
+    single_condition  go to state 27
 
 
 State 25
 
-    7 S_W: WHILE '(' condition . ')' block
-   21 condition: condition . OR condition
-   22          | condition . AND condition
+   15 ex: ex . '+' ex
+   16   | ex . '-' ex
+   17   | ex . '*' ex
+   18   | ex . '/' ex
+   26 single_condition: ex . CONDITION ex
 
-    OR   shift, and go to state 35
-    AND  shift, and go to state 36
-    ')'  shift, and go to state 37
+    CONDITION  shift, and go to state 37
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+    '*'        shift, and go to state 34
+    '/'        shift, and go to state 35
 
 
 State 26
 
-   23 condition: single_condition .
+    7 S_W: WHILE '(' condition . ')' block
+   21 condition: condition . OR condition
+   24          | condition . AND condition
 
-    $default  reduce using rule 23 (condition)
+    OR   shift, and go to state 38
+    AND  shift, and go to state 39
+    ')'  shift, and go to state 40
 
 
 State 27
 
-    8 block: '{' statement_list . '}'
-   10 statement_list: statement_list . statement
+   25 condition: single_condition .
 
-    ID   shift, and go to state 1
-    VAR  shift, and go to state 4
-    '}'  shift, and go to state 38
-
-    statement    go to state 39
-    declaration  go to state 10
-    assignment   go to state 11
+    $default  reduce using rule 25 (condition)
 
 
 State 28
 
-    6 S_DW: DO block WHILE . '(' condition ')' ';'
+    8 block: '{' statement_list . '}'
 
-    '('  shift, and go to state 40
+    '}'  shift, and go to state 41
 
 
 State 29
+
+   10 statement_list: statement . statement_list
+
+    ID   shift, and go to state 1
+    VAR  shift, and go to state 4
+
+    $default  reduce using rule 9 (statement_list)
+
+    statement_list  go to state 42
+    statement       go to state 29
+    declaration     go to state 10
+    assignment      go to state 11
+
+
+State 30
+
+    6 S_DW: DO block WHILE . '(' condition ')' ';'
+
+    '('  shift, and go to state 43
+
+
+State 31
 
    14 assignment: ID '=' ex ';' .
 
     $default  reduce using rule 14 (assignment)
 
 
-State 30
-
-   15 ex: ex '+' . ex
-
-    ID      shift, and go to state 19
-    NUMBER  shift, and go to state 20
-
-    ex  go to state 41
-
-
-State 31
-
-   16 ex: ex '-' . ex
-
-    ID      shift, and go to state 19
-    NUMBER  shift, and go to state 20
-
-    ex  go to state 42
-
-
 State 32
 
-   17 ex: ex '*' . ex
-
-    ID      shift, and go to state 19
-    NUMBER  shift, and go to state 20
-
-    ex  go to state 43
-
-
-State 33
-
-   18 ex: ex '/' . ex
+   15 ex: ex '+' . ex
 
     ID      shift, and go to state 19
     NUMBER  shift, and go to state 20
@@ -423,9 +442,9 @@ State 33
     ex  go to state 44
 
 
-State 34
+State 33
 
-   24 single_condition: ex CONDITION . ex
+   16 ex: ex '-' . ex
 
     ID      shift, and go to state 19
     NUMBER  shift, and go to state 20
@@ -433,66 +452,110 @@ State 34
     ex  go to state 45
 
 
+State 34
+
+   17 ex: ex '*' . ex
+
+    ID      shift, and go to state 19
+    NUMBER  shift, and go to state 20
+
+    ex  go to state 46
+
+
 State 35
+
+   18 ex: ex '/' . ex
+
+    ID      shift, and go to state 19
+    NUMBER  shift, and go to state 20
+
+    ex  go to state 47
+
+
+State 36
+
+   21 condition: condition . OR condition
+   22          | "(" condition . OR condition ")"
+   23          | "(" condition . AND condition ")"
+   24          | condition . AND condition
+
+    OR   shift, and go to state 48
+    AND  shift, and go to state 49
+
+
+State 37
+
+   26 single_condition: ex CONDITION . ex
+
+    ID      shift, and go to state 19
+    NUMBER  shift, and go to state 20
+
+    ex  go to state 50
+
+
+State 38
 
    21 condition: condition OR . condition
 
     ID      shift, and go to state 22
     NUMBER  shift, and go to state 23
+    "("     shift, and go to state 24
 
-    ex                go to state 24
-    condition         go to state 46
-    single_condition  go to state 26
+    ex                go to state 25
+    condition         go to state 51
+    single_condition  go to state 27
 
 
-State 36
+State 39
 
-   22 condition: condition AND . condition
+   24 condition: condition AND . condition
 
     ID      shift, and go to state 22
     NUMBER  shift, and go to state 23
+    "("     shift, and go to state 24
 
-    ex                go to state 24
-    condition         go to state 47
-    single_condition  go to state 26
+    ex                go to state 25
+    condition         go to state 52
+    single_condition  go to state 27
 
 
-State 37
+State 40
 
     7 S_W: WHILE '(' condition ')' . block
 
     '{'  shift, and go to state 14
 
-    block  go to state 48
+    block  go to state 53
 
 
-State 38
+State 41
 
     8 block: '{' statement_list '}' .
 
     $default  reduce using rule 8 (block)
 
 
-State 39
+State 42
 
-   10 statement_list: statement_list statement .
+   10 statement_list: statement statement_list .
 
     $default  reduce using rule 10 (statement_list)
 
 
-State 40
+State 43
 
     6 S_DW: DO block WHILE '(' . condition ')' ';'
 
     ID      shift, and go to state 22
     NUMBER  shift, and go to state 23
+    "("     shift, and go to state 24
 
-    ex                go to state 24
-    condition         go to state 49
-    single_condition  go to state 26
+    ex                go to state 25
+    condition         go to state 54
+    single_condition  go to state 27
 
 
-State 41
+State 44
 
    15 ex: ex . '+' ex
    15   | ex '+' ex .
@@ -500,10 +563,10 @@ State 41
    17   | ex . '*' ex
    18   | ex . '/' ex
 
-    '+'  shift, and go to state 30
-    '-'  shift, and go to state 31
-    '*'  shift, and go to state 32
-    '/'  shift, and go to state 33
+    '+'  shift, and go to state 32
+    '-'  shift, and go to state 33
+    '*'  shift, and go to state 34
+    '/'  shift, and go to state 35
 
     '+'       [reduce using rule 15 (ex)]
     '-'       [reduce using rule 15 (ex)]
@@ -512,7 +575,7 @@ State 41
     $default  reduce using rule 15 (ex)
 
 
-State 42
+State 45
 
    15 ex: ex . '+' ex
    16   | ex . '-' ex
@@ -520,10 +583,10 @@ State 42
    17   | ex . '*' ex
    18   | ex . '/' ex
 
-    '+'  shift, and go to state 30
-    '-'  shift, and go to state 31
-    '*'  shift, and go to state 32
-    '/'  shift, and go to state 33
+    '+'  shift, and go to state 32
+    '-'  shift, and go to state 33
+    '*'  shift, and go to state 34
+    '/'  shift, and go to state 35
 
     '+'       [reduce using rule 16 (ex)]
     '-'       [reduce using rule 16 (ex)]
@@ -532,7 +595,7 @@ State 42
     $default  reduce using rule 16 (ex)
 
 
-State 43
+State 46
 
    15 ex: ex . '+' ex
    16   | ex . '-' ex
@@ -540,10 +603,10 @@ State 43
    17   | ex '*' ex .
    18   | ex . '/' ex
 
-    '+'  shift, and go to state 30
-    '-'  shift, and go to state 31
-    '*'  shift, and go to state 32
-    '/'  shift, and go to state 33
+    '+'  shift, and go to state 32
+    '-'  shift, and go to state 33
+    '*'  shift, and go to state 34
+    '/'  shift, and go to state 35
 
     '+'       [reduce using rule 17 (ex)]
     '-'       [reduce using rule 17 (ex)]
@@ -552,7 +615,7 @@ State 43
     $default  reduce using rule 17 (ex)
 
 
-State 44
+State 47
 
    15 ex: ex . '+' ex
    16   | ex . '-' ex
@@ -560,10 +623,10 @@ State 44
    18   | ex . '/' ex
    18   | ex '/' ex .
 
-    '+'  shift, and go to state 30
-    '-'  shift, and go to state 31
-    '*'  shift, and go to state 32
-    '/'  shift, and go to state 33
+    '+'  shift, and go to state 32
+    '-'  shift, and go to state 33
+    '*'  shift, and go to state 34
+    '/'  shift, and go to state 35
 
     '+'       [reduce using rule 18 (ex)]
     '-'       [reduce using rule 18 (ex)]
@@ -572,66 +635,132 @@ State 44
     $default  reduce using rule 18 (ex)
 
 
-State 45
+State 48
+
+   21 condition: condition OR . condition
+   22          | "(" condition OR . condition ")"
+
+    ID      shift, and go to state 22
+    NUMBER  shift, and go to state 23
+    "("     shift, and go to state 24
+
+    ex                go to state 25
+    condition         go to state 55
+    single_condition  go to state 27
+
+
+State 49
+
+   23 condition: "(" condition AND . condition ")"
+   24          | condition AND . condition
+
+    ID      shift, and go to state 22
+    NUMBER  shift, and go to state 23
+    "("     shift, and go to state 24
+
+    ex                go to state 25
+    condition         go to state 56
+    single_condition  go to state 27
+
+
+State 50
 
    15 ex: ex . '+' ex
    16   | ex . '-' ex
    17   | ex . '*' ex
    18   | ex . '/' ex
-   24 single_condition: ex CONDITION ex .
+   26 single_condition: ex CONDITION ex .
 
-    '+'  shift, and go to state 30
-    '-'  shift, and go to state 31
-    '*'  shift, and go to state 32
-    '/'  shift, and go to state 33
+    '+'  shift, and go to state 32
+    '-'  shift, and go to state 33
+    '*'  shift, and go to state 34
+    '/'  shift, and go to state 35
 
-    $default  reduce using rule 24 (single_condition)
+    $default  reduce using rule 26 (single_condition)
 
 
-State 46
+State 51
 
    21 condition: condition . OR condition
    21          | condition OR condition .
-   22          | condition . AND condition
+   24          | condition . AND condition
 
     $default  reduce using rule 21 (condition)
 
 
-State 47
+State 52
 
    21 condition: condition . OR condition
-   22          | condition . AND condition
-   22          | condition AND condition .
+   24          | condition . AND condition
+   24          | condition AND condition .
 
-    $default  reduce using rule 22 (condition)
+    $default  reduce using rule 24 (condition)
 
 
-State 48
+State 53
 
     7 S_W: WHILE '(' condition ')' block .
 
     $default  reduce using rule 7 (S_W)
 
 
-State 49
+State 54
 
     6 S_DW: DO block WHILE '(' condition . ')' ';'
    21 condition: condition . OR condition
-   22          | condition . AND condition
+   24          | condition . AND condition
 
-    OR   shift, and go to state 35
-    AND  shift, and go to state 36
-    ')'  shift, and go to state 50
+    OR   shift, and go to state 38
+    AND  shift, and go to state 39
+    ')'  shift, and go to state 57
 
 
-State 50
+State 55
+
+   21 condition: condition . OR condition
+   21          | condition OR condition .
+   22          | "(" condition OR condition . ")"
+   24          | condition . AND condition
+
+    ")"  shift, and go to state 58
+
+    $default  reduce using rule 21 (condition)
+
+
+State 56
+
+   21 condition: condition . OR condition
+   23          | "(" condition AND condition . ")"
+   24          | condition . AND condition
+   24          | condition AND condition .
+
+    ")"  shift, and go to state 59
+
+    $default  reduce using rule 24 (condition)
+
+
+State 57
 
     6 S_DW: DO block WHILE '(' condition ')' . ';'
 
-    ';'  shift, and go to state 51
+    ';'  shift, and go to state 60
 
 
-State 51
+State 58
+
+   22 condition: "(" condition OR condition ")" .
+
+    $default  reduce using rule 22 (condition)
+
+
+State 59
+
+   23 condition: "(" condition AND condition ")" .
+
+    $default  reduce using rule 23 (condition)
+
+
+State 60
 
     6 S_DW: DO block WHILE '(' condition ')' ';' .
 

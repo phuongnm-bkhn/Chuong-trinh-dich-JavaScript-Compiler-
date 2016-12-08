@@ -1,5 +1,5 @@
 while(true){
-	var t =1;
+	var t111 =1;
 	y = 2;
 	t = t +1;
 	z = t;

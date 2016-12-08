@@ -13,7 +13,6 @@ using namespace std;
 #include "CTokener.hpp"
 
 
-class TokenManager;
 class Tokener;
 extern vector<string> splitString(string sInput, string sDelimiter);
 
@@ -42,7 +41,7 @@ class TokenManager
 
   private:
     // Doc file dinh nghia trang thai
-    void loadFile(string sPathFile);
+    bool loadFile(string sPathFile);
     
     // phan loai token ket thuc | chua ket thuc |
     bool classifyToken();
@@ -69,7 +68,6 @@ class TokenManager
 	// doc luat sinh tu bang grammar 
 	vector<Tokener*> getStateInferFromGrammarTable(Tokener* pTokenNotTerminal,
 		Tokener* pTokenTerminal);
-
 
 	// sinh ten moi bang cach them ki tu '
 	string generateNewName(string sName);

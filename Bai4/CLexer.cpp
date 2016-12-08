@@ -2075,7 +2075,7 @@ vector<string> getListToken(string sPathFileCode)
 */
 
 	vector<string> g_lstTokenDetected;
-	g_lstTokenDetected.push_back("id");
+	/*g_lstTokenDetected.push_back("do");
 	g_lstTokenDetected.push_back("+");
 	g_lstTokenDetected.push_back("id");
 	g_lstTokenDetected.push_back("*");
@@ -2083,7 +2083,38 @@ vector<string> getListToken(string sPathFileCode)
 	g_lstTokenDetected.push_back("id");
 	g_lstTokenDetected.push_back("+");
 	g_lstTokenDetected.push_back("id");
+	g_lstTokenDetected.push_back(")");*/
+
+	g_lstTokenDetected.push_back("do");
+	g_lstTokenDetected.push_back("{");
+	
+	//g_lstTokenDetected.push_back("var");
+	g_lstTokenDetected.push_back("id");
+	g_lstTokenDetected.push_back("=");
+	g_lstTokenDetected.push_back("id");
+	g_lstTokenDetected.push_back("+");
+	g_lstTokenDetected.push_back("id");
+	g_lstTokenDetected.push_back(";");
+
+	g_lstTokenDetected.push_back("var");
+	g_lstTokenDetected.push_back("id");
+	g_lstTokenDetected.push_back("=");
+	g_lstTokenDetected.push_back("id");
+	g_lstTokenDetected.push_back("+");
+	g_lstTokenDetected.push_back("id");
+	g_lstTokenDetected.push_back("-");
+	g_lstTokenDetected.push_back("num");
+	g_lstTokenDetected.push_back(";");
+	g_lstTokenDetected.push_back("}");
+	g_lstTokenDetected.push_back("while");
+	g_lstTokenDetected.push_back("(");
+	g_lstTokenDetected.push_back("id");
+	g_lstTokenDetected.push_back(">=");
+	g_lstTokenDetected.push_back("num");
 	g_lstTokenDetected.push_back(")");
+	g_lstTokenDetected.push_back(";");
+
+
 	return g_lstTokenDetected;
 }
 
