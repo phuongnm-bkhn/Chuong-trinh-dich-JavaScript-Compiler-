@@ -568,6 +568,10 @@ bool TokenManager::tryParse(vector<string> lstTokenInputCodeJs)
 	lstTokenStack.push_back(getToken(TokenManager::m_sTokenNameStart));
 
 	// Add $ to list token input if input not contain $
+	if (lstTokenInputCodeJs.size() == 0) {
+		cout << "Warnning: input size = 0";
+		return false;
+	}
 	if (lstTokenInputCodeJs.at(lstTokenInputCodeJs.size() - 1) != TokenManager::m_sTokenNameDola) 
 		lstTokenInputCodeJs.push_back(TokenManager::m_sTokenNameDola);
 	
@@ -603,8 +607,24 @@ bool TokenManager::tryParse(vector<string> lstTokenInputCodeJs)
 		// TH2 X = a  != $ 
 		if (pTokenHeadStack == pTokenInput && pTokenInput != pTokenDola) {
 			lstTokenStack.pop_back();
+			// cout << " [" << lstTokenInputCodeJs.at(ip) << "] ";
 			ip++;
 		}
+		// TH X != a = $
+		/*if (pTokenInput == pTokenDola && pTokenHeadStack != pTokenDola) {
+			cout << endl << endl;
+			cout << "Input => ";
+			for (int i = 0; i <= ip; i++) {
+				cout << " [" << lstTokenInputCodeJs.at(i) << "] ";
+			}
+			cout << endl;
+			cout << "Err: Token input err [" << pTokenInput->getName() << "]" << endl;
+			cout << "\t Token stack [" << pTokenHeadStack->getName() << "]" << endl;
+
+			bContinueParse = false;
+			bRet = false;
+			break;
+		}*/
 
 		// TH3 X is not terminal 
 		if (pTokenHeadStack->isTerminal() == false) {

@@ -38,8 +38,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 %tokens_start:S
 %tokens:id,num,while,do,or,and,var,true,false
-%tokens:S,S1,S_W,S_DW,stmt,stmtlst,block,while,(,),{,},;,/*,*/,blank,<,<=,>,>=,==,!=
-%tokens:define,assign,id,ex,var,+,-,*,/,=,num,cond,conds,conds1,conds2,conds3,compare,val,val1,val2
+%tokens:S,S1,S_W,S_DW,stmt,stmtlst,block,(,),{,},;,/*,*/,string
+%tokens:define,assign,+,-,*,/,=,num,cond,conds,conds1,conds2,conds3,compare,val,val1,val2
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // luat sinh nay cho phep phan tich nhieu khoi lenh noi tiep nhau
@@ -51,8 +51,9 @@ S->S1|S S1
 ////////////////////////////////////////////////////////////////////////////////////////
 // 1 khoi lenh S1 ( 1 khoi can phan tich ) co the la 1 khoi while,
 // 1 khoi do-while hoac chi la 1 statement don le.
+// hoac 1 dau ;
 ////////////////////////////////////////////////////////////////////////////////////////
-S1->S_W|S_DW|stmt
+S1->S_W|S_DW|stmt|;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // 1 khoi lenh do-while hoan chinh se bao gom "do" + khoi lenh trong do-while + "while" 
@@ -63,7 +64,7 @@ S_DW->do block while ( conds ) ;
 ////////////////////////////////////////////////////////////////////////////////////////
 // 1 khoi lenh while hoan chinh se bao gom "while" + ( dieu kien ) + khoi lenh trong while ...
 ////////////////////////////////////////////////////////////////////////////////////////
-S_W->while ( conds ) block ;
+S_W->while ( conds ) block
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // khoi lenh trong while va do-while bao gom nhieu statement, bao boc boi { }
@@ -89,13 +90,14 @@ define->var assign
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // ham nay cho phep noi nhieu dieu kien voi nhau bang or hoac and
+// compare = >,<,>=,<=,==,..
+//
 ////////////////////////////////////////////////////////////////////////////////////////
 conds->conds or conds1|conds1
 conds1->conds1 and conds2|conds2
 conds2->( conds )|conds3
 conds3->true|false|id compare val
 
-compare-><|<=|>|>=|==|!=
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // gan gia tri tuc la id = phep toan
@@ -103,12 +105,10 @@ compare-><|<=|>|>=|==|!=
 // val1 la 1 gia tri 1 bieu thuc * | / | val2 
 // val2 la 1 gia tri 1 bieu thuc uu tien trong -> () | id hoac num
 ////////////////////////////////////////////////////////////////////////////////////////
-//assign->id = ex ;
-//ex->ex + ex|ex - ex|ex * ex|ex / ex|id|num
 assign->id = val ;
 val->val + val1|val - val1|val1
 val1->val1 * val2|val1 / val2|val2
-val2->( val )|id|num|true|false
+val2->( val )|id|num|string|true|false
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // 1 phep so sanh co the la dieu kien (a <= b) hoac la 1 bien (x) hoac la 1 so gi do (1)

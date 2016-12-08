@@ -1,18 +1,27 @@
+// cac khoang trang
+ws@0@[ \t]+
+new_line@0@([\r\n])+
+%skip_token@1@({ws}|{new_line})
 
-reverse_string@1@(do|while|if|then|else|continue|var|true|false)
-string@1@((\"[^\n"]+\")|(\'[^\n']+\'))
+// reserve data 
+%reserve_string@1@(do|while|if|then|else|continue|var|true|false)
+%reserve_char@1@[(){};\+\-\/*=]
 
-ws@1@[ \t]+
-new_line@1@([\r\n])+
-
+//token id 
 alpha@0@[A-Za-z]
 dig@0@[0-9]
 id@1@({alpha})({alpha}|{dig}|_)*
 
+// number 
 num1@0@{dig}+\.?([eE][-+]?{dig}+)?
 num2@0@{dig}*\.{dig}+([eE][-+]?{dig}+)?
-const_number@1@{num1}|{num2}
+num@1@{num1}|{num2}
 
-condition@1@(==|>=|<=)
+// compare condition 
+compare@1@(==|>=|<=|>|<|==|!=)
 
-char@1@[(){}\[\];\+\-\/*=!?:><]
+and@1@(&&)
+or@1@(||)
+
+// string data 
+string@1@((\"[^\n"]+\")|(\'[^\n']+\'))

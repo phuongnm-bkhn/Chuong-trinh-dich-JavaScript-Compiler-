@@ -1,4 +1,4 @@
-#ifdef VS_STUDIO
+#ifdef USE_FLEX
 #include "CLexer.h"
 
 #define YY_INT_ALIGNED short int
@@ -2059,12 +2059,14 @@ vector<TOKEN_ID> getListToken(string sPathFileCode){
 #include <iostream>
 #include <vector>
 #include "CLexer.h"
+#include "CDataParser.hpp"
+#include "CTokenParser.hpp"
 using namespace std;
 
 // 
 map<TOKEN_ID, std::string> g_mapTokenName;
 
-vector<string> getListToken(string sPathFileCode) 
+vector<string> getListToken1(string sPathFileCode) 
 {
 	/*vector<TOKEN_ID> g_lstTokenDetected;
 	g_lstTokenDetected.push_back(TOKEN_ID::ID_VAR);
@@ -2088,7 +2090,7 @@ vector<string> getListToken(string sPathFileCode)
 	g_lstTokenDetected.push_back("do");
 	g_lstTokenDetected.push_back("{");
 	
-	//g_lstTokenDetected.push_back("var");
+	g_lstTokenDetected.push_back("var");
 	g_lstTokenDetected.push_back("id");
 	g_lstTokenDetected.push_back("=");
 	g_lstTokenDetected.push_back("id");
@@ -2118,4 +2120,39 @@ vector<string> getListToken(string sPathFileCode)
 	return g_lstTokenDetected;
 }
 
+vector<string> getListToken(string sPathFileCode)
+{
+	// Du lieu cua file config va file code
+	ifstream fileLexDef("data/lex-def");
+	ifstream fileCodeJs("data/code.js");
+
+	string line;
+	string sDataCodeJs((istreambuf_iterator<char>(fileCodeJs)), std::istreambuf_iterator<char>());
+
+	// Khoi tao doi tuong parser
+	vector<TokenParser*> lstToken;
+	vector<string>lstTokenName;
+	DataParser* fileLexParser = new DataParser(lstToken, sDataCodeJs);
+
+
+	// Read + parse file regex config 
+	while (getline(fileLexDef, line))
+	{
+		if (line.length() == 0 || (line.size() >=2 && line.substr(0,2) == "//")) continue;
+		TokenParser* tokenParser = new TokenParser(line);
+
+		if (tokenParser->isParsed())
+			fileLexParser->addToken(tokenParser);
+		else {
+			delete(tokenParser);
+			goto _EXIT_FUNCTION;
+		}
+
+	}
+	lstTokenName = fileLexParser->getListTokenIdInput();
+
+_EXIT_FUNCTION:
+	delete (fileLexParser);
+	return lstTokenName;
+}
 #endif
