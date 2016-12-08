@@ -50,6 +50,13 @@ class TokenManager
 	// Cai dat tap first va follow 
 	bool initFirstAndFollowSet();
 
+	// Cai dat bang grammar 
+	bool initGrammarTable();
+
+	// Them luat sinh vao bang grammar 
+	bool addStateInferToGrammarTable(Tokener* pTokenNotTerminal,
+		Tokener* pTokenTerminal, int stateInferId);
+
 	void showStateInfer();
 
 	// sinh ten moi bang cach them ki tu '
@@ -72,6 +79,8 @@ class TokenManager
     vector<string> m_lstTokenNotTerminalName;
     
 	unordered_map<string, vector<vector<string>>> m_mapStringInfer;
+	unordered_map<Tokener*, unordered_map<Tokener*, int>> m_mapGrammarTable;
+
 	static unordered_map<string, Tokener*> m_mapTokener;
 };
 

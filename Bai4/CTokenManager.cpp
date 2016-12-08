@@ -26,18 +26,21 @@ TokenManager::TokenManager(string sPathFileGrammar)
 	 // init follow and follow
 	 this->initFirstAndFollowSet();
 
+	 // init grammar table
+	 this->initGrammarTable();
+	 
 	 this->showStateInfer();
 
     /*vector<string> lstRet = this->m_lstTokenTerminalName;
-    for (int i = 0; i < lstRet.size(); i++)
+    for (int idState = 0; idState < lstRet.size(); idState++)
     {
-        cout << lstRet.at(i) << endl;
+        cout << lstRet.at(idState) << endl;
     }
 
     lstRet = this->m_lstTokenNotTerminalName;
-    for (int i = 0; i < lstRet.size(); i++)
+    for (int idState = 0; idState < lstRet.size(); idState++)
     {
-        cout << lstRet.at(i) << endl;
+        cout << lstRet.at(idState) << endl;
     }*/
 }
 
@@ -321,6 +324,49 @@ bool TokenManager::initFirstAndFollowSet() {
 	return true;
 }
 
+// Cai dat bang grammar 
+bool TokenManager::initGrammarTable() 
+{
+	bool bRet = true;
+
+	// Duyet qua tung luat sinh -> luu vao bang gramar table
+	for (auto& stateInferDefine : this->m_mapStringInfer) 
+	{
+		// lay token nguon 
+		Tokener* pTokenNotTerminal = getToken(stateInferDefine.first);
+		
+		// 1 token nguon co the co nhieu luat sinh: 
+		// duyet qua tung luat sinh phai cua token nguon
+		vector<vector<Tokener*>>& lstStateInfer = pTokenNotTerminal->getListTokenInfer();
+		for (int idState = 0; idState < lstStateInfer.size(); idState++) 
+		{
+			vector<Tokener*>& stateInfer = lstStateInfer.at(idState);
+			if (stateInfer.size() == 0) goto _EXIT_FUNCTION;
+			
+			// Them vao cac terminal symbol in first (alpha)
+			vector<Tokener*>& lstTerminalOfFirst = stateInfer.at(0)->getFirstSet();
+			for (auto pTokenTerminal : lstTerminalOfFirst) {
+				if (pTokenTerminal->getName() == TokenManager::m_sTokenNameEpsilon) continue;	// bo qua epsilon
+				bool tmpRet = this->addStateInferToGrammarTable(pTokenNotTerminal, pTokenTerminal, idState);
+				bRet = tmpRet && bRet;
+			}
+
+			// Them vao cac terminal symbol in follow (A)
+			if (stateInfer.at(0)->isFirstSetContain(getToken(TokenManager::m_sTokenNameEpsilon)))
+			{
+				vector<Tokener*>& lstTerminalOfFollow = pTokenNotTerminal->getFollowSet();
+				for (auto pTokenTerminal : lstTerminalOfFollow) {
+					bool tmpRet = this->addStateInferToGrammarTable(pTokenNotTerminal, pTokenTerminal, idState);
+					bRet = tmpRet && bRet;
+				}
+			}
+		}
+	}
+
+_EXIT_FUNCTION:
+	return bRet;
+}
+
 // Hien thi ds trang thai suy dien cua he thong 
 void TokenManager::showStateInfer() {
 
@@ -393,19 +439,40 @@ void TokenManager::showStateInfer() {
 		cout << endl;
 	}
 	cout << endl;
+	cout << endl;
 
-	/*
-	vector<string> lstRet = this->m_lstTokenTerminalName;
-	for (int i = 0; i < lstRet.size(); i++)
-	{
-		cout << lstRet.at(i) << endl;
+	cout << "- Gramar table : " << endl;
+	unordered_map<string, int> mapShow;
+	for (auto& row : m_mapGrammarTable) {
+		for (auto& col : row.second) {
+			if (mapShow.find(col.first->getName()) == mapShow.end()) {
+				mapShow[col.first->getName()] = mapShow.size();
+			}
+		}
+	}
+	printf(" [%5s] ", "");
+	for (auto col : mapShow) {
+		printf(" [%5s] ", col.first.c_str());
+	}
+	cout << endl;
+	for (int i = 0; i < mapShow.size() + 1; i++) {
+		printf("=[%5s]=", "=====");
+	}
+	cout << endl;
+	for (auto row : m_mapGrammarTable) {
+		printf(" [%5s] ", row.first->getName().c_str());
+		for (auto col : mapShow) {
+			if (row.second.find(getToken(col.first)) != row.second.end()) {
+				printf(" [%5d] ", row.second[getToken(col.first)]);
+			}
+			else
+			{
+				printf(" [%5s] ", "");
+			}
+		}
+		cout << endl;
 	}
 
-	lstRet = this->m_lstTokenNotTerminalName;
-	for (int i = 0; i < lstRet.size(); i++)
-	{
-		cout << lstRet.at(i) << endl;
-	}*/
 }
 
 // phan loai token ket thuc | chua ket thuc |
@@ -510,6 +577,7 @@ bool TokenManager::addToken(string sName)
 	return bCheck;
 }
 
+// Them token 
 bool TokenManager::addToken(vector<string> lstName) {
 	bool bCheck = false;
 
@@ -518,6 +586,33 @@ bool TokenManager::addToken(vector<string> lstName) {
 		bCheck = bCheck || tmpCheck;
 	}
 	return bCheck;
+}
+
+// Them luat sinh vao bang grammar 
+bool TokenManager::addStateInferToGrammarTable(Tokener* pTokenNotTerminal, 
+	Tokener* pTokenTerminal, int stateInferId) 
+{
+	bool bRet = true;
+	unordered_map<Tokener*, int> stateInferNew;
+
+	auto itCheckTokenNotTerminal = m_mapGrammarTable.find(pTokenNotTerminal);
+	if (itCheckTokenNotTerminal != m_mapGrammarTable.end()) {
+		unordered_map<Tokener*, int>& stateInferOld = m_mapGrammarTable[pTokenNotTerminal];
+		auto itCheckTokenTerminal = stateInferOld.find(pTokenTerminal);
+		if (itCheckTokenTerminal != stateInferOld.end()) {
+			cout << "Warning: conflict in grammar table: row = " << pTokenNotTerminal->getName()
+				<< "col = " << pTokenTerminal->getName() << endl;
+			cout << "\t old state id = " << itCheckTokenTerminal->second
+				<< "new state id = " << itCheckTokenTerminal->second << endl;
+			bRet = false;
+		}
+	}
+	m_mapGrammarTable[pTokenNotTerminal][pTokenTerminal] = stateInferId;
+	/*else {
+		stateInferNew[pTokenTerminal] = stateInferId;
+		m_mapGrammarTable[pTokenNotTerminal] = stateInferNew;
+	}*/
+	return bRet;
 }
 
 

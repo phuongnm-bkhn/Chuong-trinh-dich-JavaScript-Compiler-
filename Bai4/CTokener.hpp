@@ -25,6 +25,7 @@ public:
 
 	bool isTerminal();
 	void setListTokenInfer(vector<vector<Tokener *>> lstStateInfer);
+	vector<vector<Tokener *>> getListTokenInfer() { return this->m_lstStateInfer; };
 	
 	// Tinh toan tap first
 	vector<Tokener *> getFirstSet();
@@ -33,6 +34,12 @@ public:
 	vector<Tokener *> getFollowSet();
 	bool initFollowSet();
 
+	// Kiem tra tap first chua token
+	bool isFirstSetContain(Tokener* pToken);
+	
+	// Kiem tra tap follow chua token
+	bool isFollowSetContain(Tokener* pToken);
+
 	// Lay ten 
 	string getName() { return m_sTokenName; }
 
@@ -40,12 +47,10 @@ private:
 	// Them token vao tap first
 	void addFirstSet(Tokener* pToken);
 	void addFirstSet(vector<Tokener*> pToken);
-	bool isFirstSetContain(Tokener* pToken);
 
 	// Them token vao tap first
 	bool addFollowSet(Tokener* pToken);
 	bool addFollowSet(vector<Tokener*> pToken);
-	bool isFollowSetContain(Tokener* pToken);
 
 	string m_sTokenName;
 	bool m_bIsTerminalToken;
