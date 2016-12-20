@@ -10,12 +10,15 @@
         "**/.fuse_*":true,
         "**/.dep*":true,
         "**/dist":true,
-        "**/build":true,
+        "**/build":true, 
+        "**/*.sln":true,
+        "**/*.vcxp*":true,
+         "**/*.sdf":true,
         "**/Makefile":true
     },
     "C_Cpp.autocomplete": "Default",
     "C_Cpp.clang_format_sortIncludes": true,
-    "C_Cpp.clang_format_formatOnSave": true,
+    // "C_Cpp.clang_format_formatOnSave": true,
     "C_Cpp.clang_format_style": "file",
     "editor.formatOnType":true,
     "editor.tabCompletion": true

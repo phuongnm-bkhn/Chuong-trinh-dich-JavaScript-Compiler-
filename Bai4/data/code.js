@@ -1,3 +1,4 @@
+
 while (y >= 1) {
     var t = 1;
     y = 2;
@@ -5,6 +6,12 @@ while (y >= 1) {
     z = t;
     t = "mot ngay dep troi";
     t = t + 'mot ngay dep troi';
+    if (y >= 1) {
+        var t = 1;
+        y = 2;
+    } else {
+        t = 'hi'; 
+    }
 }
 
 do {
