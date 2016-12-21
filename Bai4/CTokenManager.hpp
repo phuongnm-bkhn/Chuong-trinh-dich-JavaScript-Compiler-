@@ -8,6 +8,7 @@
 #include <streambuf>
 #include <vector>
 #include <string>
+#include <algorithm>
 using namespace std;
 #include "libs.h"
 #include "CTokener.hpp"
